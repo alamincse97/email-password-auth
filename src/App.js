@@ -1,10 +1,10 @@
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { createUserWithEmailAndPassword, getAuth, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 import './App.css';
 import app from "./firebase.init";
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-import { useState } from "react";
 
 const auth = getAuth(app);
 
@@ -49,6 +49,7 @@ function App() {
     setError('');
 
     if(registered){
+      console.log(email, password);
       signInWithEmailAndPassword(auth, email, password)
       .then(result =>{
         const user = result.user;
@@ -67,6 +68,7 @@ function App() {
        // Filed Clear
        setEmail('');
        setPassword('');
+       verifyEmail();
     })
     .catch(error =>{
       console.error(error);
@@ -76,6 +78,22 @@ function App() {
     }
 
     event.preventDefault();
+  }
+
+  const handlePasswordReset = () =>{
+    sendPasswordResetEmail(auth, email)
+    .then(() =>{
+      console.log('email sent');
+    })
+  }
+
+  // Email Varification
+
+  const verifyEmail = () =>{
+    sendEmailVerification(auth.currentUser)
+    .then(() =>{
+      console.log('Email Verification Sent');
+    })
   }
 
   return (
@@ -104,7 +122,10 @@ function App() {
       <Form.Group className="mb-3" controlId="formBasicCheckbox">
         <Form.Check onChange={handleRegisteredChange}  type="checkbox" label="Already Registere" />
       </Form.Group>
+      <p className="text-success">{'Success'}</p>
       <p className="text-danger">{error}</p>
+      <Button onClick={handlePasswordReset} variant='link'>Forget Password?</Button>
+      <br></br>
       <Button variant="primary" type="submit">
         {registered ? 'Login': 'Register'}
       </Button>
@@ -115,3 +136,4 @@ function App() {
 }
 
 export default App;
+
